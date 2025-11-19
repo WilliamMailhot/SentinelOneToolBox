@@ -1,0 +1,2 @@
+dataSource.vendor='Microsoft' dataSource.category = 'security' actor.user.email_addr = *  src_endpoint.ip = * event.type = 'Logon'
+| columns timestamp, actor.user.email_addr, src_endpoint.ip, geo_ip_country(src_endpoint.ip)
