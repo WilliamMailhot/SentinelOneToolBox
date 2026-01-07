@@ -252,7 +252,6 @@ EOF
             sudo tee -a "$CONFIG_FILE" > /dev/null << EOF
   tcp {
     port => $SOURCE_PORT
-    codec => json
     tags => ["$SOURCE_NAME", "tcp"]
   }
 EOF
@@ -261,7 +260,6 @@ EOF
             sudo tee -a "$CONFIG_FILE" > /dev/null << EOF
   udp {
     port => $SOURCE_PORT
-    codec => json
     tags => ["$SOURCE_NAME", "udp"]
   }
 EOF
