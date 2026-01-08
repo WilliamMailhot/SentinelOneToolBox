@@ -237,7 +237,7 @@ for ((i=0; i<${#DATA_SOURCES[@]}; i++)); do
     
     echo -e "${CYAN}Creating configuration for $SOURCE_NAME...${NC}"
     
-    # Create the configuration file
+    # Start the configuration file
     sudo tee "$CONFIG_FILE" > /dev/null << EOF
 # Configuration for $SOURCE_NAME
 # Port: $SOURCE_PORT
@@ -282,24 +282,17 @@ EOF
             ;;
     esac
     
-    # Add filter and output sections
+    # Close input block and add output section with logic isolation
     sudo tee -a "$CONFIG_FILE" > /dev/null << EOF
 }
 
-filter {
-  # Add your filters here
-  if "$SOURCE_NAME" in [tags] {
-    mutate {
-      add_field => { "data_source" => "$SOURCE_NAME" }
-    }
-  }
-}
-
 output {
-  # Write to individual log file for this data source
-  file {
-    path => "$LOGSTASH_LOG_DIR/${SAFE_NAME}.log"
-    codec => line { format => "%{message}" }
+  # Conditional check ensures data isolation in merged pipelines
+  if "$SOURCE_NAME" in [tags] {
+    file {
+      path => "$LOGSTASH_LOG_DIR/${SAFE_NAME}.log"
+      codec => line { format => "%{message}" }
+    }
   }
 }
 EOF
@@ -307,16 +300,6 @@ EOF
     echo -e "${GREEN}✓ Created $CONFIG_FILE${NC}"
     echo -e "${CYAN}  → Output: $LOGSTASH_LOG_DIR/${SAFE_NAME}.log${NC}"
 done
-
-echo ""
-echo -e "${GREEN}═══════════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}Configuration Summary:${NC}"
-echo -e "${GREEN}═══════════════════════════════════════════════════════════════════${NC}"
-for ((i=0; i<${#DATA_SOURCES[@]}; i++)); do
-    SAFE_NAME=$(echo "${DATA_SOURCES[$i]}" | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | tr -cd '[:alnum:]_-')
-    echo -e "${CYAN}  ${DATA_SOURCES[$i]}${NC}: Port ${DATA_PORTS[$i]} (${DATA_TYPES[$i]}) → $LOGSTASH_LOG_DIR/${SAFE_NAME}.log"
-done
-echo ""
 
 # Configure logrotate
 echo -e "${CYAN}═══════════════════════════════════════════════════════════════════${NC}"
