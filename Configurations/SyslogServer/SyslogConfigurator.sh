@@ -318,15 +318,11 @@ $LOGSTASH_LOG_DIR/*.log {
     hourly
     size 1G
     rotate 7
-    compress
-    delaycompress
+    nocompress
     missingok
     notifempty
     create 0644 logstash logstash
-    sharedscripts
-    postrotate
-        /usr/bin/systemctl reload logstash > /dev/null 2>&1 || true
-    endscript
+    copytruncate
 }
 EOF
 
